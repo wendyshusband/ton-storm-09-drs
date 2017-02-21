@@ -6,7 +6,7 @@ import backtype.storm.utils.NimbusClient;
 import backtype.storm.utils.Utils;
 import resa.optimize.AggResultCalculator;
 import resa.optimize.AllocCalculator;
-import resa.optimize.TestGeneralAllocCalculator;
+import resa.optimize.MMKAllocCalculator;
 import resa.util.ResaConfig;
 import resa.util.TopologyHelper;
 
@@ -74,9 +74,7 @@ public class TestResaMetricAnalyzer {
                 .collect(Collectors.groupingBy(e -> e.get_component_id(),
                         Collectors.reducing(0, e -> 1, (i1, i2) -> i1 + i2)));
 
-//        AllocCalculator smdm = new SimpleGeneralAllocCalculator();
-//        AllocCalculator smdm = new GeneralAllocCalculator();
-        AllocCalculator smdm = new TestGeneralAllocCalculator();
+        AllocCalculator smdm = new MMKAllocCalculator();
 
         smdm.init(conf, currAllocation, nimbus.getUserTopology(topoId));
 

@@ -74,7 +74,6 @@ public class ResaMetricAnalyzer {
                 .collect(Collectors.groupingBy(e -> e.get_component_id(),
                         Collectors.reducing(0, e -> 1, (i1, i2) -> i1 + i2)));
 
-//        AllocCalculator smdm = new SimpleGeneralAllocCalculator();
         AllocCalculator smdm = new GeneralAllocCalculator();
 
         smdm.init(conf, currAllocation, nimbus.getUserTopology(topoId));
