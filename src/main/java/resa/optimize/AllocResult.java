@@ -19,7 +19,7 @@ public class AllocResult {
     // (e.g. consider expected rebalance gain vs. cost)
 
     public static enum Status {
-        INFEASIBLE, FEASIBLE
+        OVERPROVISIONING, SHORTAGE, INFEASIBLE, FEASIBLE,
     }
 
     public final Status status;

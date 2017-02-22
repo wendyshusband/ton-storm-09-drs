@@ -28,6 +28,8 @@ public class ResaConfig extends Config {
     public static final String OPTIMIZE_WIN_HISTORY_SIZE = "resa.opt.win.history.size";
     public static final String OPTIMIZE_WIN_HISTORY_SIZE_IGNORE = "resa.opt.win.history.size.ignore";
     public static final String OPTIMIZE_SMD_QOS_MS = "resa.opt.smd.qos.ms";
+    public static final String OPTIMIZE_SMD_QOS_UPPER_MS = "resa.opt.smd.qos.upper.ms";
+    public static final String OPTIMIZE_SMD_QOS_LOWER_MS = "resa.opt.smd.qos.lower.ms";
     public static final String OPTIMIZE_SMD_SEND_QUEUE_THRESH = "resa.opt.smd.sq.thresh";
     public static final String OPTIMIZE_SMD_RECV_QUEUE_THRESH_RATIO = "resa.opt.smd.rq.thresh.ratio";
 

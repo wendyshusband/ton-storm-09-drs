@@ -50,6 +50,8 @@ public class MMKAllocCalculator extends AllocCalculator {
         ///TODO: Here we assume only one spout, how to extend to multiple spouts?
         ///TODO: here we assume only one running topology, how to extend to multiple running topologies?
         double targetQoSMs = ConfigUtil.getDouble(conf, ResaConfig.OPTIMIZE_SMD_QOS_MS, 5000.0);
+        double completeTimeMilliSecUpper = ConfigUtil.getDouble(conf, ResaConfig.OPTIMIZE_SMD_QOS_UPPER_MS, 2000.0);
+        double completeTimeMilliSecLower = ConfigUtil.getDouble(conf, ResaConfig.OPTIMIZE_SMD_QOS_LOWER_MS, 500.0);
         int maxSendQSize = ConfigUtil.getInt(conf, Config.TOPOLOGY_EXECUTOR_SEND_BUFFER_SIZE, 1024);
         int maxRecvQSize = ConfigUtil.getInt(conf, Config.TOPOLOGY_EXECUTOR_RECEIVE_BUFFER_SIZE, 1024);
         double sendQSizeThresh = ConfigUtil.getDouble(conf, ResaConfig.OPTIMIZE_SMD_SEND_QUEUE_THRESH, 5.0);
@@ -147,7 +149,7 @@ public class MMKAllocCalculator extends AllocCalculator {
 
         LOG.info("Run Optimization, tQos: " + targetQoSMs + ", currUsed: " + currentUsedThreadByBolts + ", kMax: " + maxThreadAvailable4Bolt + ", currAllo: " + currAllocation);
         AllocResult allocResult = MMKServiceModel.checkOptimized(
-                spInfo, queueingNetwork, targetQoSMs, boltAllocation, maxThreadAvailable4Bolt, currentUsedThreadByBolts, MMKServiceModel.ServiceModelType.MMK);
+                spInfo, queueingNetwork, completeTimeMilliSecUpper, completeTimeMilliSecLower, boltAllocation, maxThreadAvailable4Bolt, currentUsedThreadByBolts, MMKServiceModel.ServiceModelType.MMK);
 
 
         Map<String, Integer> retCurrAllocation = null;
@@ -177,6 +179,6 @@ public class MMKAllocCalculator extends AllocCalculator {
         super.allocationChanged(newAllocation);
         spoutHistoricalData.clear();
         boltHistoricalData.clear();
-        currHistoryCursor = ConfigUtil.getInt(conf, "resa.opt.win.history.size.ignore", 0);
+        currHistoryCursor = ConfigUtil.getInt(conf, ResaConfig.OPTIMIZE_WIN_HISTORY_SIZE_IGNORE, 0);
     }
 }
