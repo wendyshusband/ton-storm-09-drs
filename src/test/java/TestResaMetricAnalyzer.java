@@ -32,26 +32,29 @@ public class TestResaMetricAnalyzer {
             String metricQueue = args[1];
             long sleepTime = Long.parseLong(args[2]);
             int maxAllowedExecutors = Integer.parseInt(args[3]);
-            double qos = Double.parseDouble(args[4]);
-            int historySize = Integer.parseInt(args[5]);
-            int ignoreSize = Integer.parseInt(args[6]);
+            double qos_upper = Double.parseDouble(args[4]);
+            double qos_lower = Double.parseDouble(args[5]);
+            int historySize = Integer.parseInt(args[6]);
+            int ignoreSize = Integer.parseInt(args[7]);
             System.out.println("Topology name: " + topName + ", metricQueue: " + metricQueue
-                    + ", sleepTime: " + sleepTime + ", maxAllowed: " + maxAllowedExecutors + ", qos: " + qos);
+                    + ", sleepTime: " + sleepTime + ", maxAllowed: " + maxAllowedExecutors + ", qos_u: " + qos_upper + ", qos_l: " + qos_lower);
             TestResaMetricAnalyzer rt = new TestResaMetricAnalyzer();
-            rt.testMakeUsingTopologyHelperForkTopology(topName, metricQueue, sleepTime, maxAllowedExecutors, qos, historySize, ignoreSize);
+            rt.testMakeUsingTopologyHelperForkTopology(topName, metricQueue, sleepTime, maxAllowedExecutors, qos_upper, qos_lower, historySize, ignoreSize);
         }catch (Exception e){
             e.printStackTrace();
         }
     }
 
     public void testMakeUsingTopologyHelperForkTopology(
-            String topoName, String metricQueue, long sleepTime, int allewedExecutorNum, double qos, int historySize, int ignoreSize) throws Exception {
+            String topoName, String metricQueue, long sleepTime, int allewedExecutorNum, double qos_upper, double qos_lower, int historySize, int ignoreSize) throws Exception {
 
         conf.put(Config.NIMBUS_HOST, "192.168.0.31");
         conf.put(Config.NIMBUS_THRIFT_PORT, 6627);
         conf.put(Config.TOPOLOGY_DEBUG, true);
 
-        conf.put("resa.opt.smd.qos.ms", qos);
+        conf.put("resa.opt.smd.qos.ms", qos_upper);
+        conf.put("resa.opt.smd.qos.upper.ms", qos_upper);
+        conf.put("resa.opt.smd.qos.lower.ms", qos_lower);
         conf.put("resa.opt.win.history.size", historySize);
         conf.put("resa.opt.win.history.size.ignore", ignoreSize);
         conf.put("resa.comp.sample.rate", 1.0);
