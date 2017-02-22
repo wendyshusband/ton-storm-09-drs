@@ -77,7 +77,7 @@ public class Aggregater extends BaseRichBolt implements Constant {
             String out = fCtx.frameId + ":" + fCtx.imageCounter.entrySet().stream()
                     .filter(e -> (double) e.getValue().get() / fCtx.featDescCount > minPercentage)
                     .map(e -> e.getKey().toString()).collect(Collectors.joining(","));
-            System.out.println(out);
+//            System.out.println(out);
             // just for metrics output
             collector.emit(new Values(out));
             pendingFrames.remove(fCtx.frameId);

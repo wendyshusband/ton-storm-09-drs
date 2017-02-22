@@ -17,6 +17,7 @@ public class ImageSource extends RedisQueueSpout {
 
     private long frameId;
     private String idPrefix;
+    private long acked;
 
     public ImageSource(String host, int port, String queue) {
         super(host, port, queue, true);
@@ -27,6 +28,7 @@ public class ImageSource extends RedisQueueSpout {
         super.open(conf, context, collector);
         this.collector = collector;
         frameId = 0;
+        acked = 0;
         idPrefix = String.format("s-%02d-", context.getThisTaskIndex() + 1);
     }
 
@@ -39,5 +41,11 @@ public class ImageSource extends RedisQueueSpout {
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
         declarer.declareStream(STREAM_IMG_OUTPUT, new Fields(FIELD_FRAME_ID, FIELD_IMG_BYTES));
+    }
+
+    @Override
+    public void ack(Object msgId) {
+        acked ++;
+        System.out.println("ImageSource.ack(), sent: " + frameId + ", acked: " + acked + ", msgID: " + msgId);
     }
 }
