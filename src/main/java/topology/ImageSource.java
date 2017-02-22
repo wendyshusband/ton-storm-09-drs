@@ -47,6 +47,6 @@ public class ImageSource extends RedisQueueSpout {
     public void ack(Object msgId) {
         acked ++;
 //        long unacked = frameId - acked;
-        System.out.println(String.format("ImageSource.ack(), sent: %l, acked: %l", frameId, acked));
+        System.out.println(String.format("ImageSource.ack(), sent: %d, acked: %d", frameId, acked));
     }
 }
