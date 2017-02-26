@@ -32,6 +32,7 @@ public class ResaConfig extends Config {
     public static final String OPTIMIZE_SMD_QOS_LOWER_MS = "resa.opt.smd.qos.lower.ms";
     public static final String OPTIMIZE_SMD_SEND_QUEUE_THRESH = "resa.opt.smd.sq.thresh";
     public static final String OPTIMIZE_SMD_RECV_QUEUE_THRESH_RATIO = "resa.opt.smd.rq.thresh.ratio";
+    public static final String OPTIMIZE_SMD_RESOURCE_UNIT = "resa.opt.smd.resource.unit";
 
     public static final String ZK_ROOT_PATH = "resa.scheduler.zk.root";
     public static final String DECISION_MAKER_CLASS = "resa.scheduler.decision.class";

@@ -138,7 +138,7 @@ public class MMKServiceModel {
      */
     public static Map<String, Integer> getMinReqServerAllocationGeneralTopApplyMMK(
             double realLatencyMilliSeconds, double estTotalSojournTimeMilliSec_MMK, Map<String, GeneralServiceNode> serviceNodes,
-            double completeTimeMilliSecUpper, double completeTimeMilliSecLower, int currentUsedThreadByBolts, int maxAvailableExec) {
+            double completeTimeMilliSecUpper, double completeTimeMilliSecLower, int currentUsedThreadByBolts, int maxAvailableExec, int reUnit) {
 
         double lowerBoundServiceTimeSeconds = 0.0;  //in seconds
         int totalMinReq = 0;
@@ -157,8 +157,8 @@ public class MMKServiceModel {
 
             LOG.debug("In getMinReqServerAllocationGeneralTopApplyMMK(), " +
                     "lowerBoundServiceTimeSeconds * adjRatio * 1000.0 < completeTimeMilliSecUpper && totalMinReq < maxAvailableExec");
-            int i = currentUsedThreadByBolts + 1;
-            for (; i <= maxAvailableExec; i++) {
+            int i = currentUsedThreadByBolts + reUnit;
+            for (; i <= maxAvailableExec; i += reUnit) {
                 currAllocation = suggestAllocationGeneralTopApplyMMK(serviceNodes, i);
                 double currTime = getExpectedTotalSojournTimeForJacksonOQN(serviceNodes, currAllocation);
 
@@ -178,7 +178,7 @@ public class MMKServiceModel {
 
     public static Map<String, Integer> getRemovedAllocationGeneralTopApplyMMK(
             double realLatencyMilliSeconds, double estTotalSojournTimeMilliSec_MMK, Map<String, GeneralServiceNode> serviceNodes,
-            double completeTimeMilliSecUpper, double completeTimeMilliSecLower, int currentUsedThreadByBolts) {
+            double completeTimeMilliSecUpper, double completeTimeMilliSecLower, int currentUsedThreadByBolts, int reUnit) {
 
         int totalMinReq2 = 0;
         for (Map.Entry<String, GeneralServiceNode> e : serviceNodes.entrySet()) {
@@ -200,8 +200,8 @@ public class MMKServiceModel {
         Map<String, Integer> currAllocation = null;
         if (currentUsedThreadByBolts > totalMinReq){
             LOG.debug("In getRemovedAllocationGeneralTopApplyMMK(), currentUsedThreadByBolts > totalMinReq");
-            int i = currentUsedThreadByBolts - 1;
-            for (; i > totalMinReq; i--) {
+            int i = currentUsedThreadByBolts - reUnit;
+            for (; i > totalMinReq; i = i - reUnit) {
                 currAllocation = suggestAllocationGeneralTopApplyMMK(serviceNodes, i);
                 double currTime = getExpectedTotalSojournTimeForJacksonOQN(serviceNodes, currAllocation);
 
@@ -270,7 +270,7 @@ public class MMKServiceModel {
     public static AllocResult checkOptimized_MMK(
             GeneralSourceNode sourceNode, Map<String, GeneralServiceNode> queueingNetwork,
             double completeTimeMilliSecUpper, double completeTimeMilliSecLower,
-            Map<String, Integer> currBoltAllocation, int maxAvailable4Bolt, int currentUsedThreadByBolts) {
+            Map<String, Integer> currBoltAllocation, int maxAvailable4Bolt, int currentUsedThreadByBolts, int resourceUnit) {
 
         /// Caution about the time unit!, second is used in all the functions of calculation
         /// millisecond is used in the output display!
@@ -293,7 +293,7 @@ public class MMKServiceModel {
             LOG.debug("Status is resource shortage, calling resource adjustment");
             adjustedAllocation = getMinReqServerAllocationGeneralTopApplyMMK(
                     realLatencyMilliSeconds, estTotalSojournTimeMilliSec_MMK, queueingNetwork,
-                    completeTimeMilliSecUpper, completeTimeMilliSecLower, currentUsedThreadByBolts, maxAvailable4Bolt);
+                    completeTimeMilliSecUpper, completeTimeMilliSecLower, currentUsedThreadByBolts, maxAvailable4Bolt, resourceUnit);
 
             if (adjustedAllocation == null){
                 LOG.debug("Status is resource shortage and no feasible re-allocation solution");
@@ -304,7 +304,7 @@ public class MMKServiceModel {
             LOG.debug("Status is resource over-provisioning");
             adjustedAllocation = getRemovedAllocationGeneralTopApplyMMK(
                     realLatencyMilliSeconds, estTotalSojournTimeMilliSec_MMK, queueingNetwork,
-                    completeTimeMilliSecUpper, completeTimeMilliSecLower, currentUsedThreadByBolts);
+                    completeTimeMilliSecUpper, completeTimeMilliSecLower, currentUsedThreadByBolts, resourceUnit);
         }
 
         Map<String, Object> context = new HashMap<>();
@@ -318,14 +318,26 @@ public class MMKServiceModel {
         return new AllocResult(status, adjustedAllocation, currOptAllocation, kMaxOptAllocation).setContext(context);
     }
 
+    /**
+     *
+     * @param sourceNode
+     * @param queueingNetwork
+     * @param completeTimeMilliSecUpper
+     * @param completeTimeMilliSecLower
+     * @param currBoltAllocation
+     * @param maxAvailable4Bolt
+     * @param currentUsedThreadByBolts
+     * @param resourceUnit  it is to indicate the units of resources shall be allocated each time adding or removing
+     * @return
+     */
     public static AllocResult checkOptimized(
             GeneralSourceNode sourceNode, Map<String, GeneralServiceNode> queueingNetwork,
             double completeTimeMilliSecUpper, double completeTimeMilliSecLower,
-            Map<String, Integer> currBoltAllocation, int maxAvailable4Bolt, int currentUsedThreadByBolts, ServiceModelType retAlloType) {
+            Map<String, Integer> currBoltAllocation, int maxAvailable4Bolt, int currentUsedThreadByBolts, int resourceUnit) {
 
         AllocResult allocResult = checkOptimized_MMK(
-                sourceNode, queueingNetwork, completeTimeMilliSecUpper, completeTimeMilliSecLower, currBoltAllocation, maxAvailable4Bolt, currentUsedThreadByBolts);
-        LOG.info("MMK, alloStat: " + allocResult.status);
+                sourceNode, queueingNetwork, completeTimeMilliSecUpper, completeTimeMilliSecLower, currBoltAllocation, maxAvailable4Bolt, currentUsedThreadByBolts, resourceUnit);
+        LOG.info("MMK, reUnit: " + resourceUnit  +  ", alloStat: " + allocResult.status);
         LOG.info("MMK, currOptAllo: " + allocResult.currOptAllocation);
         LOG.info("MMK, adjustAllo: " + allocResult.minReqOptAllocation);
         LOG.info("MMK, kMaxOptAllo: " + allocResult.kMaxOptAllocation);
