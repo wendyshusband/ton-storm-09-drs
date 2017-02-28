@@ -70,7 +70,8 @@ public class SimpleAdaptDecisionMaker implements DecisionMaker {
 
                 LOG.info("SimpleAdaptDecisionMaker.make(), " +
                         "ewAllocResult.status == FEASIBLE, rebalance is triggered without adjusting current used resources, but re-allocation to optimal may be possible");
-                return newAllocResult.currOptAllocation;
+                ///return newAllocResult.currOptAllocation;
+                return null;
 
             } else {
                 throw new IllegalArgumentException("Illegal status: " + newAllocResult.status);
