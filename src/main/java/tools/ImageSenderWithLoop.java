@@ -35,14 +35,14 @@ public class ImageSenderWithLoop {
 
     }
 
-    public void send2Queue(int st, int end, int fps, int range, int safeLen, int stopTime, int mode) throws IOException {
+    public void send2Queue(int st, int end, int fps, int range, int safeLen, int stopTime, int mode, int totalDurationInSeconds) throws IOException {
         Jedis jedis = new Jedis(host, port);
         int generatedFrames = 0;
         int fileIndex = st;
 
         try {
-            long start = System.currentTimeMillis();
-            long last = start;
+            final long startTime = System.currentTimeMillis();
+            long last = startTime;
             long qLen = 0;
             int target = fps + (int)((2 * Math.random() - 1) * range);
             int finished = 0;
@@ -81,7 +81,7 @@ public class ImageSenderWithLoop {
                     }
                     last = System.currentTimeMillis();
                     qLen = jedis.llen(this.queueName);
-                    System.out.println("Target: " + target + ", elapsed: " + (last - start) / 1000
+                    System.out.println("Target: " + target + ", elapsed: " + (last - startTime) / 1000
                             + ",totalSend: " + generatedFrames+ ", remain: " + remain + ", sendQLen: " + qLen);
                     while (qLen > safeLen){
                         Thread.sleep(Math.max(100, stopTime));
@@ -91,6 +91,14 @@ public class ImageSenderWithLoop {
                     target = fps + (int)((2 * Math.random() - 1) * range);
                     finished = 0;
                 }
+
+                if (totalDurationInSeconds > 0) {
+                    int totalLast = (int)((System.currentTimeMillis() - startTime) / 1000);
+                    if (totalLast > totalDurationInSeconds){
+                        System.out.println(totalDurationInSeconds + " seconds passed and exit");
+                        return;
+                    }
+                }
             }
 
         } catch (InterruptedException e){
@@ -99,18 +107,20 @@ public class ImageSenderWithLoop {
     }
 
     public static void main(String[] args) throws Exception {
-        if (args.length < 4) {
-            System.out.println("usage: ImageSender <confFile> <fileSt> <fileEnd> <fps> <range> <safeLen> <stopTime> <mode>");
+        if (args.length != 9) {
+            System.out.println("usage: ImageSender <confFile> <fileSt> <fileEnd> <fps> <range> <safeLen> <stopTime> <mode> <totalDuration, -1 means infinity>");
             return;
         }
         ImageSenderWithLoop sender = new ImageSenderWithLoop(ConfigUtil.readConfig(new File(args[0])));
-        System.out.println(String.format("start sender, st: %d, end: %d, fps: %d, r: %d, slen: %d, sTime: %d, mode: %d",
+        System.out.println(String.format("start sender, st: %d, end: %d, fps: %d, r: %d, slen: %d, sTime: %d, mode: %d, totalDuration: %d",
                 Integer.parseInt(args[1]), Integer.parseInt(args[2]),
                 Integer.parseInt(args[3]), Integer.parseInt(args[4]),
-                Integer.parseInt(args[5]), Integer.parseInt(args[6]), Integer.parseInt(args[7])));
+                Integer.parseInt(args[5]), Integer.parseInt(args[6]),
+                Integer.parseInt(args[7]), Integer.parseInt(args[8])));
         sender.send2Queue(Integer.parseInt(args[1]), Integer.parseInt(args[2]),
                 Integer.parseInt(args[3]), Integer.parseInt(args[4]),
-                Integer.parseInt(args[5]), Integer.parseInt(args[6]), Integer.parseInt(args[7]));
+                Integer.parseInt(args[5]), Integer.parseInt(args[6]),
+                Integer.parseInt(args[7]), Integer.parseInt(args[8]));
         System.out.println("end sender");
     }
 
