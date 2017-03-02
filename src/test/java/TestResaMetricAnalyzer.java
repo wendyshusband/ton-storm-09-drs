@@ -25,6 +25,7 @@ public class TestResaMetricAnalyzer {
     //"task.2Path-Spout.16->{\    private Map<String, Object> conf = ResaConfig.create(true);
 
     private Map<String, Object> conf = ResaConfig.create(true);
+
     public static void main(String[] args) {
         System.out.println("ResaMetricAnalyzer based on ResaDataSource");
         try {
@@ -40,7 +41,7 @@ public class TestResaMetricAnalyzer {
                     + ", sleepTime: " + sleepTime + ", maxAllowed: " + maxAllowedExecutors + ", qos_u: " + qos_upper + ", qos_l: " + qos_lower);
             TestResaMetricAnalyzer rt = new TestResaMetricAnalyzer();
             rt.testMakeUsingTopologyHelperForkTopology(topName, metricQueue, sleepTime, maxAllowedExecutors, qos_upper, qos_lower, historySize, ignoreSize);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -81,7 +82,7 @@ public class TestResaMetricAnalyzer {
 
         smdm.init(conf, currAllocation, nimbus.getUserTopology(topoId));
 
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 10000000; i++) {
             Utils.sleep(sleepTime);
 
             topoInfo = nimbus.getTopologyInfo(topoId);
@@ -98,15 +99,22 @@ public class TestResaMetricAnalyzer {
             resultCalculator.calCMVStat();
 
             long currTime = System.currentTimeMillis();
-            System.out.println("------Report on: " + currTime + ",last for: " + (currTime - startTime)/60000 + " minutes, " + (currTime - startTime) + " secs.----------");
-            if (currAllocation.equals(updatedAllocation)) {
-                System.out.println(currAllocation + "-->" + smdm.calc(resultCalculator.getComp2ExecutorResults(), allewedExecutorNum));
-            } else {
+            System.out.println("------Report on: " + currTime + ",last for: " + (currTime - startTime) / 60000 + " minutes, " + (currTime - startTime) + " secs.----------");
+            System.out.println(currAllocation + "-->" + smdm.calc(resultCalculator.getComp2ExecutorResults(), allewedExecutorNum));
+            if (!currAllocation.equals(updatedAllocation)) {
                 currAllocation = updatedAllocation;
                 smdm.allocationChanged(currAllocation);
                 ResaDataSource.clearQueue(host, port, metricQueue);
                 System.out.println("Allocation updated to " + currAllocation);
             }
+//            if (currAllocation.equals(updatedAllocation)) {
+//                System.out.println(currAllocation + "-->" + smdm.calc(resultCalculator.getComp2ExecutorResults(), allewedExecutorNum));
+//            } else {
+//                currAllocation = updatedAllocation;
+//                smdm.allocationChanged(currAllocation);
+//                ResaDataSource.clearQueue(host, port, metricQueue);
+//                System.out.println("Allocation updated to " + currAllocation);
+//            }
         }
     }
 }
