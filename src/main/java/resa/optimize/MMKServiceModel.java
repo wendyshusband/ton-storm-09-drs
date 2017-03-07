@@ -48,6 +48,10 @@ public class MMKServiceModel {
      */
     public static double getExpectedTotalSojournTimeForJacksonOQN(Map<String, GeneralServiceNode> serviceNodes, Map<String, Integer> allocation) {
 
+        if (allocation == null){
+            return Double.POSITIVE_INFINITY;
+        }
+
         double retVal = 0.0;
         for (Map.Entry<String, GeneralServiceNode> e : serviceNodes.entrySet()) {
             String cid = e.getKey();
